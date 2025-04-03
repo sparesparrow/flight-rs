@@ -1,0 +1,9 @@
+---
+description: testing with cargo run server
+globs: 
+alwaysApply: false
+---
+- use `cargo run --bin server` to run the game serving on LAN on `http://192.168.200.158:8080/` and always ensure there is just one instance of the game running locally with the latest working version of the game
+- once server is ready, test client from another terminal (and then with various client tools, i.e. with `curl`, `firefox`, `docker`, etc.)
+- use screenshots and analyze them in integration tests
+- update docs with relevant screenshot

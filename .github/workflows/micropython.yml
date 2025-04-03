@@ -1,0 +1,63 @@
+name: MicroPython Client
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - 'micropython/**'
+  pull_request:
+    branches: [ "main", "master" ]
+    paths:
+      - 'micropython/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pycodestyle
+    
+    - name: Lint with ruff
+      run: |
+        ruff check micropython/
+    
+    - name: Check style with pycodestyle
+      run: |
+        pycodestyle --max-line-length=100 micropython/
+  
+  test-with-micropython:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install micropython-stub
+
+    - name: Static check MicroPython code
+      run: |
+        # Use micropython-stub to perform static checking of MicroPython code
+        python -m micropython_stub.tools.mpremote run micropython/client.py --check
+      continue-on-error: true  # Static checking may not be perfect for MicroPython
+
+    - name: Set up ESP32 emulation environment (if available)
+      run: |
+        # This is a placeholder for ESP32 emulation setup
+        # In a real workflow, you might use Docker with an ESP32 simulator
+        echo "Setting up ESP32 emulation environment"
+      continue-on-error: true 

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+    command: server
+    volumes:
+      - ./src:/app/src
+      - ./web:/app/web
+      - cargo-cache:/usr/local/cargo/registry
+    networks:
+      - flight-sim-network
+
+  test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      - RUST_LOG=info
+    command: test
+    volumes:
+      - ./src:/app/src
+      - ./python:/app/python
+      - cargo-cache:/usr/local/cargo/registry
+    networks:
+      - flight-sim-network
+    depends_on:
+      - server
+
+  dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/app
+      - cargo-cache:/usr/local/cargo/registry
+      - python-cache:/app/venv
+    environment:
+      - RUST_LOG=info
+    ports:
+      - "8080:8080"  # Server port
+      - "2222:22"    # SSH for remote development (if needed)
+    command: bash -c "tail -f /dev/null"  # Keep container running for SSH access
+    networks:
+      - flight-sim-network
+
+networks:
+  flight-sim-network:
+    driver: bridge
+
+volumes:
+  cargo-cache:
+  python-cache: 

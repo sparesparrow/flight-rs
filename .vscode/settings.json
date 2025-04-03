@@ -1,0 +1,31 @@
+{
+    "editor.formatOnSave": true,
+    "editor.rulers": [100],
+    "editor.renderWhitespace": "boundary",
+    
+    // Rust settings
+    "rust-analyzer.checkOnSave.command": "clippy",
+    "rust-analyzer.cargo.allFeatures": true,
+    "rust-analyzer.procMacro.enable": true,
+    "rust-analyzer.checkOnSave.allFeatures": true,
+    
+    // Python settings
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+    "python.linting.pylintEnabled": false,
+    
+    // HTML/Web
+    "html.format.wrapLineLength": 100,
+    "html.format.indentInnerHtml": true,
+    
+    // MicroPython settings
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "micropico.syncFolder": "${workspaceFolder}/micropython",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/micropython/lib"
+    ]
+} 

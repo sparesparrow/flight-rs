@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "flight-simulator-tools"
+version = "0.1.0"
+description = "Python tools for the Flight Simulator project"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+websockets = "^11.0.3"
+mpremote = "^1.22.0"
+adafruit-ampy = "^1.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.1"
+black = "^23.3.0"
+isort = "^5.12.0"
+pyright = "^1.1.358"
+pytest-asyncio = "^0.21.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.pyright]
+include = ["python"]
+exclude = ["**/__pycache__"]
+typeCheckingMode = "basic"
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+python_files = "test_*.py"
+asyncio_mode = "auto" 

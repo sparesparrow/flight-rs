@@ -1,0 +1,162 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #333;
+    /* Dark grey background */
+    color: #ccc;
+    /* Light grey text */
+    margin: 0;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1 {
+    color: #f00;
+    /* Red for emphasis, like Party banners */
+    text-align: center;
+    border-bottom: 1px solid #555;
+    padding-bottom: 0.5em;
+    margin-bottom: 1em;
+}
+
+#connection-status,
+#player-id {
+    background-color: #222;
+    border: 1px solid #555;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    text-align: center;
+}
+
+#character-creation {
+    background-color: #444;
+    border: 1px solid #666;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+#character-creation label {
+    display: inline-block;
+    width: 100px;
+    margin-bottom: 0.5em;
+}
+
+#character-creation input,
+#character-creation select,
+#character-creation button {
+    margin-bottom: 0.5em;
+    background-color: #555;
+    color: #ccc;
+    border: 1px solid #777;
+    padding: 0.3em;
+}
+
+#character-creation button {
+    cursor: pointer;
+    background-color: #f00;
+    color: #fff;
+}
+
+#game-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1em;
+    flex-grow: 1;
+}
+
+.game-panel {
+    background-color: #444;
+    border: 1px solid #666;
+    padding: 1em;
+}
+
+.game-panel h2 {
+    color: #ddd;
+    border-bottom: 1px solid #777;
+    padding-bottom: 0.3em;
+    margin-top: 0;
+}
+
+.game-panel h3 {
+    color: #ccc;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.game-panel h4 {
+    color: #bbb;
+    margin-top: 0.8em;
+    margin-bottom: 0.3em;
+}
+
+#location-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+#location-actions button,
+#journal-submit,
+#npc-options button {
+    background-color: #555;
+    color: #ccc;
+    border: 1px solid #777;
+    padding: 0.5em;
+    cursor: pointer;
+    margin-right: 0.5em;
+    /* Add space between buttons */
+    margin-bottom: 0.3em;
+    /* Add space below buttons */
+}
+
+#location-actions button:hover,
+#journal-submit:hover,
+#npc-options button:hover {
+    background-color: #666;
+}
+
+#narrative-log #log-entries {
+    max-height: 200px;
+    /* Limit height and make scrollable */
+    overflow-y: auto;
+    border: 1px dashed #777;
+    padding: 0.5em;
+    margin-top: 0.5em;
+    background-color: #3a3a3a;
+}
+
+#narrative-log #log-entries p {
+    margin: 0 0 0.5em 0;
+    padding: 0;
+    border-bottom: 1px dotted #555;
+    padding-bottom: 0.3em;
+}
+
+#journal textarea,
+#journal input {
+    width: 95%;
+    background-color: #555;
+    color: #ccc;
+    border: 1px solid #777;
+    padding: 0.3em;
+    margin-bottom: 0.5em;
+}
+
+#inventory ul,
+#player-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#inventory li,
+#player-list li {
+    padding: 0.2em 0;
+    border-bottom: 1px dotted #555;
+}
+
+/* Utility class */
+.hidden {
+    display: none;
+}

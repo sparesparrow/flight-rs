@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>1984: Shadows of Oceania</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        <h1>1984: Shadows of Oceania</h1>
+        <div id="connection-status">Connecting...</div>
+        <div id="player-id">Your ID: N/A</div>
+
+        <hr>
+
+        <div id="character-creation" class="hidden">
+            <h2>Create Your Character</h2>
+            <label for="char-name">Name:</label>
+            <input type="text" id="char-name" required><br>
+            <label for="char-occupation">Occupation:</label>
+            <select id="char-occupation">
+                <option value="Records Department Worker">Records Department Worker (MinTruth)
+                </option>
+                <option value="Maintenance Technician">Maintenance Technician (MinPlenty)</option>
+                <option value="Junior Spy Instructor">Junior Spy Instructor (MinLove)</option>
+                <option value="Fiction Department Writer">Fiction Department Writer (MinTruth)
+                </option>
+            </select><br>
+            <button id="create-char-button">Submit to the Party</button>
+        </div>
+
+        <div id="game-content" class="hidden">
+            <div class="game-panel" id="character-stats">
+                <h2>Your Status</h2>
+                <div>Name: <span id="stat-name"></span></div>
+                <div>Occupation: <span id="stat-occupation"></span></div>
+                <div>Health: <span id="stat-health"></span>/100</div>
+                <div>Loyalty: <span id="stat-loyalty"></span>/100</div>
+                <div>Suspicion: <span id="stat-suspicion"></span>/100</div>
+                <div>Thoughtcrime: <span id="stat-thoughtcrime"></span>/100</div>
+                <div>Rebellion: <span id="stat-rebellion"></span>/100</div>
+            </div>
+
+            <div class="game-panel" id="location-info">
+                <h2>Location: <span id="location-name"></span></h2>
+                <div id="location-description"></div>
+                <div id="location-safety"></div>
+                <h3>Available Actions:</h3>
+                <div id="location-actions">
+                    <div id="move-actions">
+                        <h4>Move To:</h4>
+                        <div id="move-options"></div>
+                    </div>
+                    <div id="npc-actions">
+                        <h4>Interact With:</h4>
+                        <div id="npc-options"></div>
+                    </div>
+                    <div id="other-actions">
+                        <h4>Other:</h4>
+                        <button id="action-search">Search</button>
+                        <button id="action-work">Work</button>
+                        <button id="action-rest">Rest</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-panel" id="narrative-log">
+                <h2>Events</h2>
+                <div id="log-entries"></div>
+            </div>
+
+            <div class="game-panel" id="journal">
+                <h2>Journal</h2>
+                <textarea id="journal-display" readonly rows="6" cols="40"></textarea><br>
+                <input type="text" id="journal-entry" placeholder="Write a new entry (Careful!)">
+                <button id="journal-submit">Write</button>
+            </div>
+
+            <div class="game-panel" id="inventory">
+                <h2>Inventory</h2>
+                <ul id="inventory-list"></ul>
+            </div>
+
+            <div class="game-panel" id="player-list">
+                <h2>Other Party Members Present:</h2>
+                <ul id="present-players-list"></ul>
+            </div>
+
+        </div>
+
+        <script src="script.js"></script>
+    </body>
+
+</html>
