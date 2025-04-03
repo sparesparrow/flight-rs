@@ -6,9 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>1984: Shadows of Oceania</title>
         <link rel="stylesheet" href="style.css">
+        <!-- Include Three.js -->
+        <script type="importmap">
+            { "imports": { "three": "https://unpkg.com/three@0.164.1/build/three.module.js" } }
+        </script>
     </head>
 
     <body>
+        <!-- Three.js Container -->
+        <div id="threejs-container"></div>
+
+        <!-- Existing RPG UI (will overlap initially) -->
         <h1>1984: Shadows of Oceania</h1>
         <div id="connection-status">Connecting...</div>
         <div id="player-id">Your ID: N/A</div>
@@ -90,7 +98,7 @@
 
         </div>
 
-        <script src="script.js"></script>
+        <script src="script.js" type="module"></script>
     </body>
 
 </html>

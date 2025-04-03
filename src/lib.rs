@@ -1,3 +1,5 @@
+#![warn(missing_docs)]
+
 use futures::{SinkExt, StreamExt};
 use log::{info, warn};
 use nalgebra::Vector3;
@@ -445,6 +447,15 @@ fn handle_client_message(
                 send_message_to_client(&clients, player_id, &narrative_msg);
                 broadcast_state_update(&clients, game_state); // Broadcast health change
             }
+        }
+        // Add a wildcard match arm to handle all other cases for now
+        _ => {
+            warn!(
+                "Unhandled message type from player {}: {:?}",
+                player_id, msg
+            );
+            let error_msg = ServerMessage::Error("This feature is not yet implemented".to_string());
+            send_message_to_client(clients, player_id, &error_msg);
         }
     }
     // Note: Broadcasting the entire state on every action can be inefficient.

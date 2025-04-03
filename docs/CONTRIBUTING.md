@@ -207,6 +207,101 @@ Good documentation is essential for this project:
 3. **User Guides**: Update user-facing documentation
 4. **Architecture Documentation**: Update diagrams if you change the architecture
 
+### Documentation Best Practices for Rust
+
+To ensure high-quality documentation throughout the codebase, please follow these guidelines:
+
+#### Doc Comments and Examples
+
+- Use `///` triple-slash comments for documenting items (structs, functions, modules)
+- Include examples in your documentation that show how to use the API
+- Properly format code examples with triple backticks and the rust language specifier:
+
+```rust
+/// Represents a flight control surface
+/// 
+/// # Examples
+/// 
+/// ```rust
+/// let aileron = ControlSurface::new("aileron", 0.5);
+/// assert_eq!(aileron.deflection, 0.5);
+/// ```
+pub struct ControlSurface {
+    pub name: String,
+    pub deflection: f32,  // -1.0 to 1.0
+}
+```
+
+#### Error Handling in Examples
+
+When writing examples that could fail, use the `?` operator with appropriate return types:
+
+```rust
+/// Example with error handling
+/// ```rust
+/// # fn main() -> Result<(), std::num::ParseIntError> {
+/// let value = "42".parse::<u32>()?;
+/// println!("{} + 10 = {}", value, value + 10);
+/// # Ok(())
+/// # }
+/// ```
+```
+
+#### Documentation Tests
+
+- All documentation examples are run as tests via `cargo test`
+- Use attributes for special test cases:
+  - `no_run` - Code compiles but doesn't execute (e.g., for network operations)
+  - `should_panic` - Code should compile but panic during execution
+  - `compile_fail` - Code should fail to compile (for demonstrating errors)
+  - `ignore` - Skip this test (use sparingly)
+
+```rust
+/// ```no_run
+/// // This example won't be executed but will be compiled
+/// loop {
+///     println!("This would run forever!");
+/// }
+/// ```
+```
+
+#### Hidden Documentation Lines
+
+Use `#` at the beginning of a line to hide it from rendered documentation but include it for testing:
+
+```rust
+/// Creating and using a vector:
+/// ```rust
+/// # // This setup code is hidden in docs but used in tests
+/// # let mut numbers = Vec::new();
+/// numbers.push(1);
+/// numbers.push(2);
+/// assert_eq!(numbers.len(), 2);
+/// ```
+```
+
+#### Use Warning Lint for Missing Documentation
+
+To ensure comprehensive documentation, consider adding this to the crate root (e.g., `src/lib.rs`):
+
+```rust
+#![warn(missing_docs)]
+```
+
+This will produce warnings for items missing documentation. For stricter enforcement, use:
+
+```rust
+#![deny(missing_docs)]
+```
+
+### Testing Documentation
+
+Before submitting a PR, ensure your documentation is correct by:
+
+1. Running `cargo test` to verify all doc examples work
+2. Running `cargo doc --open` to preview generated documentation
+3. Checking that examples are clear and correctly demonstrate the API
+
 ## License
 
 By contributing to this project, you agree that your contributions will be licensed under the project's license. 

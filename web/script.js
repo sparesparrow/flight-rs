@@ -1,4 +1,6 @@
-console.log("1984 RPG Client Script Loaded");
+import * as THREE from 'three';
+
+console.log("1984 RPG Client Script Loaded with Three.js support");
 
 // --- Configuration ---
 const RECONNECT_DELAY = 3000; // Milliseconds
@@ -7,6 +9,13 @@ const RECONNECT_DELAY = 3000; // Milliseconds
 let socket = null;
 let myPlayerId = null;
 let currentGameState = null;
+let playerInput = { pitch: 0, roll: 0, yaw: 0, throttle_change: 0 }; // Added input state
+const keysPressed = {}; // Track currently pressed keys
+
+// --- Three.js Variables ---
+let scene, camera, renderer;
+let groundPlane;
+const players3D = {}; // Map player ID to their 3D object { mesh: THREE.Mesh, lastUpdate: timestamp }
 
 // --- DOM Element References ---
 const connectionStatus = document.getElementById('connection-status');
@@ -53,6 +62,8 @@ const actionSearchButton = document.getElementById('action-search');
 const actionWorkButton = document.getElementById('action-work');
 const actionRestButton = document.getElementById('action-rest');
 
+const threeJsContainer = document.getElementById('threejs-container'); // Get the container
+
 // --- Utility Functions ---
 function showElement(element) {
     element?.classList.remove('hidden');
@@ -74,6 +85,74 @@ function addLogEntry(text, type = 'normal') {
     // while (logEntriesDiv.children.length > 100) {
     //     logEntriesDiv.removeChild(logEntriesDiv.lastChild);
     // }
+}
+
+// --- Three.js Functions ---
+function initThreeJS() {
+    console.log("Initializing Three.js scene...");
+
+    // 1. Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x222222); // Match body background
+    scene.fog = new THREE.Fog(0x222222, 10, 100); // Add some fog for depth
+
+    // 2. Camera
+    const fov = 75;
+    const aspect = window.innerWidth / window.innerHeight;
+    const near = 0.1;
+    const far = 200; // Increased far plane
+    camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    camera.position.set(0, 5, 10); // Position camera slightly up and back
+    camera.lookAt(0, 0, 0);
+
+    // 3. Renderer
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    threeJsContainer.appendChild(renderer.domElement);
+
+    // 4. Lighting
+    const ambientLight = new THREE.AmbientLight(0xaaaaaa); // Soft ambient light
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    directionalLight.position.set(5, 10, 7.5);
+    scene.add(directionalLight);
+    // TODO: Add shadow support later if needed
+
+    // 5. Ground Plane
+    const groundGeometry = new THREE.PlaneGeometry(200, 200);
+    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, side: THREE.DoubleSide });
+    groundPlane = new THREE.Mesh(groundGeometry, groundMaterial);
+    groundPlane.rotation.x = -Math.PI / 2; // Rotate to be horizontal
+    groundPlane.position.y = -0.1; // Slightly below origin
+    scene.add(groundPlane);
+
+    // Handle window resize
+    window.addEventListener('resize', onWindowResize, false);
+
+    console.log("Three.js scene initialized.");
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    // --- Update Player Objects --- 
+    updatePlayerObjects();
+
+    // --- Update Input --- 
+    handleInput(); // Process held keys and potentially send FlyInput
+
+    // --- Render --- 
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
 // --- WebSocket Functions ---
@@ -211,6 +290,7 @@ function handlePlayerLeft(data) {
 
 function handleGameStateUpdate(newGameState) {
     console.log("Updating game state:", newGameState);
+    const previousGameState = currentGameState;
     currentGameState = newGameState;
 
     // If game content isn't visible yet, but we now have a character, show it.
@@ -219,7 +299,54 @@ function handleGameStateUpdate(newGameState) {
         showElement(gameContentDiv);
     }
 
-    // Update all UI elements based on the new state
+    // --- Update 3D Objects based on GameState --- 
+    const activePlayerIds = new Set(Object.keys(currentGameState.players));
+
+    // Add/Update players present in the new state
+    for (const playerId in currentGameState.players) {
+        const playerData = currentGameState.players[playerId];
+
+        if (!players3D[playerId]) {
+            // Player doesn't exist yet, create a 3D object
+            console.log(`Creating 3D object for player ${playerId}`);
+            const geometry = new THREE.BoxGeometry(1, 1, 2); // Simple box for now
+            const material = new THREE.MeshStandardMaterial({
+                color: playerId === myPlayerId ? 0x00ff00 : 0xff0000 // Green for self, red for others
+            });
+            const playerMesh = new THREE.Mesh(geometry, material);
+            scene.add(playerMesh);
+            players3D[playerId] = { mesh: playerMesh, lastUpdate: Date.now() };
+        }
+
+        // Update position and orientation
+        const playerObj = players3D[playerId];
+        if (playerData.position && playerObj) {
+            playerObj.mesh.position.set(playerData.position.x, playerData.position.y, playerData.position.z);
+        }
+        if (playerData.orientation && playerObj) {
+            // Nalgebra Quaternions are likely [x, y, z, w], Three.js uses (x, y, z, w)
+            playerObj.mesh.quaternion.set(
+                playerData.orientation.coords.x,
+                playerData.orientation.coords.y,
+                playerData.orientation.coords.z,
+                playerData.orientation.coords.w
+            );
+        }
+        playerObj.lastUpdate = Date.now(); // Mark as updated
+    }
+
+    // Remove players that are no longer in the game state
+    for (const existingPlayerId in players3D) {
+        if (!activePlayerIds.has(existingPlayerId)) {
+            console.log(`Removing 3D object for disconnected player ${existingPlayerId}`);
+            scene.remove(players3D[existingPlayerId].mesh);
+            players3D[existingPlayerId].mesh.geometry.dispose(); // Clean up geometry
+            players3D[existingPlayerId].mesh.material.dispose(); // Clean up material
+            delete players3D[existingPlayerId];
+        }
+    }
+
+    // Update the 2D UI elements (existing logic)
     updateUI(currentGameState);
 }
 
@@ -397,6 +524,41 @@ function sendRestRequest() {
     sendMessage({ RestRequest: {} });
 }
 
+// --- Input Handling --- 
+function setupInputListeners() {
+    window.addEventListener('keydown', (event) => {
+        keysPressed[event.code] = true;
+    });
+    window.addEventListener('keyup', (event) => {
+        keysPressed[event.code] = false;
+    });
+    // Could add mouse listeners here too if needed
+}
+
+function handleInput() {
+    // Reset input changes for this frame
+    playerInput.pitch = 0;
+    playerInput.roll = 0;
+    playerInput.yaw = 0;
+    playerInput.throttle_change = 0;
+    let inputChanged = false;
+
+    // Map keys to inputs (adjust sensitivity/scaling as needed)
+    if (keysPressed['KeyW'] || keysPressed['ArrowUp']) { playerInput.pitch = 1.0; inputChanged = true; }
+    if (keysPressed['KeyS'] || keysPressed['ArrowDown']) { playerInput.pitch = -1.0; inputChanged = true; }
+    if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) { playerInput.roll = -1.0; inputChanged = true; } // Roll left
+    if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { playerInput.roll = 1.0; inputChanged = true; } // Roll right
+    if (keysPressed['KeyQ']) { playerInput.yaw = -1.0; inputChanged = true; } // Yaw left
+    if (keysPressed['KeyE']) { playerInput.yaw = 1.0; inputChanged = true; } // Yaw right
+    if (keysPressed['ShiftLeft'] || keysPressed['ShiftRight']) { playerInput.throttle_change = 1.0; inputChanged = true; } // Increase throttle
+    if (keysPressed['ControlLeft'] || keysPressed['ControlRight']) { playerInput.throttle_change = -1.0; inputChanged = true; } // Decrease throttle
+
+    // Send FlyInput message if any input is active
+    if (inputChanged) {
+        sendMessage({ FlyInput: playerInput });
+    }
+}
+
 // --- Event Listeners ---
 createCharButton.addEventListener('click', sendCharacterCreation);
 journalSubmitButton.addEventListener('click', sendJournalWrite);
@@ -412,6 +574,34 @@ journalEntryInput.addEventListener('keypress', function (e) {
     }
 });
 
-// --- Initialisation ---
-addLogEntry("Initializing client...");
-connectWebSocket();
+// --- Initialization ---
+function init() {
+    console.log("Initializing Client...");
+    initThreeJS();      // Initialize Three.js first
+    setupInputListeners(); // Setup keyboard listeners
+    animate();          // Start the render loop
+    connectWebSocket(); // Connect WebSocket
+
+    // Add event listeners for existing UI
+    createCharButton?.addEventListener('click', sendCharacterCreation);
+    journalSubmitButton?.addEventListener('click', sendJournalWrite);
+    actionSearchButton?.addEventListener('click', sendSearchRequest);
+    actionWorkButton?.addEventListener('click', sendWorkRequest);
+    actionRestButton?.addEventListener('click', sendRestRequest);
+
+    // Event delegation for dynamic buttons (move, interact)
+    locationInfoPanel?.addEventListener('click', (event) => {
+        if (event.target.matches('.move-button')) {
+            sendMoveRequest(event.target.dataset.location);
+        }
+        if (event.target.matches('.interact-button')) {
+            // TODO: Implement interaction types if needed
+            sendInteractRequest(event.target.dataset.npc, 0);
+        }
+    });
+
+    console.log("Client Initialized.");
+}
+
+// Start the application
+init();
